@@ -20,6 +20,7 @@ namespace LeanSlang
 /-- Scalar primitive types Slang supports out of the box. -/
 inductive Scalar
   | float
+  | half
   | uint
   | int
   | bool
@@ -31,6 +32,7 @@ inductive SlangType
   | scalar (s : Scalar)
   | vec    (s : Scalar) (n : Nat)         -- e.g. Float3 = vec float 3
   | mat    (s : Scalar) (rows cols : Nat) -- e.g. Float4x4 = mat float 4 4
+  | simdgroup (s : Scalar) (rows cols : Nat)  -- e.g. simdgroup(half, 8, 8) -> simdgroup_half8x8
   | rwBuf  (elem : SlangType)              -- RWStructuredBuffer<elem>
   | roBuf  (elem : SlangType)              --   StructuredBuffer<elem>
   | const  (struct_name : String)          -- ConstantBuffer<struct_name>

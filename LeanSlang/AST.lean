@@ -32,11 +32,15 @@ inductive SlangExpr
   | member   (recv : SlangExpr) (field : String)
   | bin      (op : String) (lhs rhs : SlangExpr)
   | un       (op : String) (e : SlangExpr)
-  | call     (fn : String) (args : List SlangExpr)
-  /-- `(cond ? t : f)` — ternary select. Emits with explicit parens
-      so it can nest inside larger expressions without ambiguity. -/
-  | ternary  (cond t f : SlangExpr)
-deriving Inhabited
+  | call (fn : String) (args : List SlangExpr)
+   /-- `(cond ? t : f)` — ternary select. Emits with explicit parens
+    so it can nest inside larger expressions without ambiguity. -/
+   | ternary (cond t f : SlangExpr)
+   /-- `simdgroup_multiply_accumulate(acc, a, b, acc)` — HLSL simdgroup
+    matrix multiply-add. Maps to Metal `simdgroup_multiply_accumulate`
+    or SPIR-V `OpCooperativeMatrixMulAdd`. -/
+   | simdgroupMulAdd (acc lhs rhs : SlangExpr)
+ deriving Inhabited
 
 /-- Slang statements. -/
 inductive SlangStmt
@@ -60,12 +64,19 @@ inductive SlangStmt
   /-- `if (cond) { then } [else { else }]`. -/
   | ifThen   (cond : SlangExpr) (thenS : List SlangStmt) (elseS : List SlangStmt)
   /-- `for (uint <name> = <init>; <name> < <bound>; ++<name>) { body }`. -/
-  | forCount  (name : String) (init bound : SlangExpr) (body : List SlangStmt)
-  /-- `while (cond) { body }` — caller supplies the termination
-      condition. Used for solver convergence loops and tree
-      reductions where the step isn't a simple `++`. -/
-  | whileLoop (cond : SlangExpr) (body : List SlangStmt)
-deriving Inhabited
+  | forCount (name : String) (init bound : SlangExpr) (body : List SlangStmt)
+   /-- `while (cond) { body }` — caller supplies the termination
+    condition. Used for solver convergence loops and tree
+    reductions where the step isn't a simple `++`. -/
+   | whileLoop (cond : SlangExpr) (body : List SlangStmt)
+   /-- `simdgroupLoad(dest, source, stride)` — load simdgroup matrix
+    from groupshared memory. Each thread in the simdgroup loads
+    one element. -/
+   | simdgroupLoad (dest source : SlangExpr) (stride : Nat)
+   /-- `simdgroupStore(dest, source, stride)` — store simdgroup matrix
+    to device memory or groupshared. -/
+   | simdgroupStore (dest source : SlangExpr) (stride : Nat)
+ deriving Inhabited
 
 /-- Convenience: declare with no initializer. -/
 def SlangStmt.decl (ty : SlangType) (name : String) : SlangStmt :=

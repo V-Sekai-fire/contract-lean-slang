@@ -15,6 +15,7 @@ namespace LeanSlang
 
 def emitScalar : Scalar → String
   | .float => "float"
+  | .half  => "half"
   | .uint  => "uint"
   | .int   => "int"
   | .bool  => "bool"
@@ -23,6 +24,7 @@ partial def emitSlangType : SlangType → String
   | .scalar s    => emitScalar s
   | .vec s n     => emitScalar s ++ toString n
   | .mat s r c   => emitScalar s ++ toString r ++ "x" ++ toString c
+  | .simdgroup s r c => "simdgroup_" ++ emitScalar s ++ toString r ++ "x" ++ toString c
   | .rwBuf t     => "RWStructuredBuffer<" ++ emitSlangType t ++ ">"
   | .roBuf t     =>   "StructuredBuffer<" ++ emitSlangType t ++ ">"
   | .const sName => "ConstantBuffer<" ++ sName ++ ">"
@@ -76,6 +78,8 @@ partial def emitExpr : SlangExpr → String
       fn ++ "(" ++ argsStr ++ ")"
   | .ternary c t f     =>
       "(" ++ emitExpr c ++ " ? " ++ emitExpr t ++ " : " ++ emitExpr f ++ ")"
+  | .simdgroupMulAdd acc lhs rhs =>
+      "simdgroup_multiply_accumulate(" ++ emitExpr acc ++ ", " ++ emitExpr lhs ++ ", " ++ emitExpr rhs ++ ", " ++ emitExpr acc ++ ")"
 
 /-! ## Statements -/
 
@@ -130,6 +134,10 @@ partial def emitStmt : Nat → SlangStmt → String
       let bodyStr := String.intercalate "\n" (body.map (emitStmt (depth + 1)))
       let close := indent depth ++ closeBrace
       head ++ "\n" ++ bodyStr ++ "\n" ++ close
+  | depth, .simdgroupLoad dest source stride =>
+      indent depth ++ emitExpr dest ++ "[laneInSG] = " ++ emitExpr source ++ ";"
+  | depth, .simdgroupStore dest source stride =>
+      indent depth ++ emitExpr dest ++ " = " ++ emitExpr source ++ "[laneInSG];"
 
 /-! ## Function attributes / declarations / module -/
 
