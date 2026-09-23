@@ -45,6 +45,20 @@ inductive SlangExpr
   /-- Constructor-style conversion `ty(e)`, e.g. `float(w[i])`,
       `half4(v)`, `double(x)`. -/
   | cast     (ty : SlangType) (e : SlangExpr)
+  /-- Exact `float` literal: `v` rounded to binary32, printed as the
+      shortest decimal that parses back to that binary32 through
+      either a direct decimal->float parse or decimal->double->float
+      (slangc's path), with an `f` suffix, e.g. `1.0e-12f`, `0.1f`,
+      `0.33333334f`. Negative values are parenthesised, `(-0.5f)`;
+      a value that is not finite as binary32 prints as
+      `asfloat(0x7F800000u)`. Unlike `litFloat`, which prints six
+      decimal places, nothing below 1e-6 is lost. -/
+  | litFloatExact  (v : Float)
+  /-- Exact `double` literal: the shortest decimal that parses back to
+      `v`'s binary64, with an `L` suffix, e.g. `1.0e-12L`,
+      `0.3333333333333333L`; negative values parenthesised; a
+      non-finite `v` prints as `asdouble(lo, hi)`. -/
+  | litDoubleExact (v : Float)
 deriving Inhabited
 
 /-- Slang statements. -/

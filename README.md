@@ -62,6 +62,12 @@ void main(uint3 tid : SV_DispatchThreadID) {
 - `LeanSlang/TestFp.lean` — the same for the `half` / `double`
   scalars and the `litHalf`, `litInt` and `cast` expressions,
   including whole HalfLoad, HalfArith and DoubleSpline modules.
+- `LeanSlang/TestExact.lean` — the same for `litFloatExact` /
+  `litDoubleExact`, the exact float literals. `litFloat` prints six
+  decimal places (`1e-12` becomes `0.000000`) and is kept as is for
+  existing pins; new code that needs a small or many-digit constant
+  uses the exact forms, which print the shortest decimal that parses
+  back to the same binary32 / binary64 on both `slangc` targets.
 
 ## Roadmap
 
