@@ -36,6 +36,15 @@ inductive SlangExpr
   /-- `(cond ? t : f)` — ternary select. Emits with explicit parens
       so it can nest inside larger expressions without ambiguity. -/
   | ternary  (cond t f : SlangExpr)
+  /-- Half-precision literal: the `litFloat` text with an `h` suffix,
+      e.g. `1.500000h`. -/
+  | litHalf  (v : Float)
+  /-- Signed integer literal. Negative values are parenthesised,
+      `(-3)`, so they nest under a binary or unary operator. -/
+  | litInt   (v : Int)
+  /-- Constructor-style conversion `ty(e)`, e.g. `float(w[i])`,
+      `half4(v)`, `double(x)`. -/
+  | cast     (ty : SlangType) (e : SlangExpr)
 deriving Inhabited
 
 /-- Slang statements. -/

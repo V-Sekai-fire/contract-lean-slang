@@ -59,6 +59,9 @@ void main(uint3 tid : SV_DispatchThreadID) {
   pretty-printer.
 - `LeanSlang/Test.lean` — pinned reference fixtures, asserted via
   `native_decide`. Drift in the pretty-printer trips here.
+- `LeanSlang/TestFp.lean` — the same for the `half` / `double`
+  scalars and the `litHalf`, `litInt` and `cast` expressions,
+  including whole HalfLoad, HalfArith and DoubleSpline modules.
 
 ## Roadmap
 

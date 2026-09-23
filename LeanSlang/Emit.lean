@@ -18,6 +18,8 @@ def emitScalar : Scalar → String
   | .uint  => "uint"
   | .int   => "int"
   | .bool  => "bool"
+  | .half  => "half"
+  | .double => "double"
 
 partial def emitSlangType : SlangType → String
   | .scalar s    => emitScalar s
@@ -58,11 +60,16 @@ def emitGlobalBinding (b : SlangBinding) : String :=
 
 /-! ## Expressions -/
 
+/-- Text of a float literal: Lean's `Float` `toString`, with `.0`
+    appended when it has neither a point nor an exponent. Shared by
+    `litFloat` (as is) and `litHalf` (plus an `h` suffix). -/
+def emitFloatText (v : Float) : String :=
+  let s := toString v
+  if s.contains '.' || s.contains 'e' || s.contains 'E' then s
+  else s ++ ".0"
+
 partial def emitExpr : SlangExpr → String
-  | .litFloat v        =>
-      let s := toString v
-      if s.contains '.' || s.contains 'e' || s.contains 'E' then s
-      else s ++ ".0"
+  | .litFloat v        => emitFloatText v
   | .litUint v         => toString v ++ "u"
   | .litBool true      => "true"
   | .litBool false     => "false"
@@ -76,6 +83,9 @@ partial def emitExpr : SlangExpr → String
       fn ++ "(" ++ argsStr ++ ")"
   | .ternary c t f     =>
       "(" ++ emitExpr c ++ " ? " ++ emitExpr t ++ " : " ++ emitExpr f ++ ")"
+  | .litHalf v         => emitFloatText v ++ "h"
+  | .litInt v          => if v < 0 then "(" ++ toString v ++ ")" else toString v
+  | .cast ty e         => emitSlangType ty ++ "(" ++ emitExpr e ++ ")"
 
 /-! ## Statements -/
 

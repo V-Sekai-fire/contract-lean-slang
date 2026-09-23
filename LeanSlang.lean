@@ -2,6 +2,7 @@ import LeanSlang.Types
 import LeanSlang.AST
 import LeanSlang.Emit
 import LeanSlang.Test
+import LeanSlang.TestFp
 
 /-!
 # `LeanSlang` — Lean 4 → Slang shader codegen

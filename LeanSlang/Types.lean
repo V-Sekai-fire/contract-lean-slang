@@ -4,7 +4,7 @@
 Pure data — no logic. Mirrors the subset of Slang's type system that
 the DDM matvec shader (and similarly small compute kernels) need:
 
-- Scalar: `Float`, `Uint`, `Int`, `Bool`.
+- Scalar: `Float`, `Uint`, `Int`, `Bool`, `Half`, `Double`.
 - Vector: `Float3`, `Float4`, `Uint3`.
 - Matrix: `Float4x4`.
 - Buffer: `RWStructuredBuffer<T>`, `StructuredBuffer<T>` (read-only).
@@ -17,12 +17,20 @@ them.
 
 namespace LeanSlang
 
-/-- Scalar primitive types Slang supports out of the box. -/
+/-- Scalar primitive types Slang supports out of the box.
+    `half` and `double` are appended after the original four so the
+    constructor order (and every existing match) is unchanged. -/
 inductive Scalar
   | float
   | uint
   | int
   | bool
+  /-- 16-bit float. slangc 2026.13 declares SPIR-V
+      `UniformAndStorageBuffer16BitAccess` and `Float16` for a `half`
+      storage buffer, even when the kernel only loads and widens. -/
+  | half
+  /-- 64-bit float. Needs SPIR-V `Float64`. -/
+  | double
 deriving Repr, BEq, DecidableEq, Inhabited
 
 /-- The Slang type. We keep it small and add nodes only when a shader
