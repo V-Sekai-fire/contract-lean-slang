@@ -1,75 +1,28 @@
-# lean-slang
+# contract-lean-slang
 
-Lean 4 → [Slang](https://shader-slang.com) shader codegen.
+A Lean 4 library that builds a Slang shader AST and prints it as source text, with a check that the text compiles to SPIR-V.
 
-A small Lean library that builds an in-memory Slang AST and pretty-
-prints it to source text accepted by `slangc -target spirv`. Pure
-Lean in this v0.0.x line; v0.1.x adds an `extern_lib` that
-round-trips the emitted text through `libslang` to SPIR-V at lake
-build time.
+## What it is for
 
-The Slang language reference is at
-<https://github.com/shader-slang/spec> — extend the AST in
-`LeanSlang/AST.lean` to cover features you need.
+It lets a compute kernel be written and checked in Lean and emitted as a shader, rather than
+hand-ported from a separate spec. Reference fixtures are asserted when the library builds, so a
+change to the printer fails the build, and an end-to-end check compiles the emitted text in
+process. RFD 2032 owns the design.
 
-## Usage
+## Build
 
-```
-require LeanSlang from git
-  "https://github.com/V-Sekai-fire/lean-slang.git" @ "v0.0.1"
+```sh
+vendor/fetch.sh
+lake build
 ```
 
-Then in Lean:
+The fetch downloads the Slang SDK the compile check links. Another Lake package depends on it
+with:
 
 ```lean
-import LeanSlang.Types
-import LeanSlang.AST
-import LeanSlang.Emit
-
-open LeanSlang
-
-def trivialShader : SlangShaderModule :=
-  { functions := [{
-      attrs  := [.shaderCompute, .numthreads 1 1 1]
-      name   := "main"
-      params := [⟨"tid", .vec .uint 3, .svDispatchThreadId, none, none⟩]
-      body   := [.ret none]
-    }] }
-
-#eval IO.println (LeanSlang.emit trivialShader)
+require LeanSlang from git "https://github.com/V-Sekai-fire/contract-lean-slang.git"
 ```
 
-emits
+## Licence
 
-```
-[shader("compute")] [numthreads(1, 1, 1)]
-void main(uint3 tid : SV_DispatchThreadID) {
-  return;
-}
-```
-
-## Layout
-
-- `LeanSlang/Types.lean` — `Scalar`, `SlangType`, `Semantic`,
-  `SlangBinding`. Pure data; small Slang subset.
-- `LeanSlang/AST.lean` — `SlangExpr`, `SlangStmt`,
-  `SlangFunctionDecl`, `SlangShaderModule`. Smart constructors
-  alongside.
-- `LeanSlang/Emit.lean` — `emit : SlangShaderModule → String`
-  pretty-printer.
-- `LeanSlang/Test.lean` — pinned reference fixtures, asserted via
-  `native_decide`. Drift in the pretty-printer trips here.
-
-## Roadmap
-
-- v0.0.1 — pure-Lean AST + emitter, native_decide fixtures green.
-- v0.1.x — FFI to `libslang-compiler` (compile emitted Slang to
-  SPIR-V at lake build time, magic-byte / size-floor assertions).
-- v0.2.x — coverage for the DDM matvec compute kernel needed by
-  [V-Sekai-fire/TOOL_godot_curvenet](https://github.com/V-Sekai-fire/TOOL_godot_curvenet).
-- v0.3.x — extend AST to a useful subset of the
-  [Slang spec](https://github.com/shader-slang/spec).
-
-## License
-
-MIT.
+MIT; see `LICENSE`.
