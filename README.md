@@ -16,7 +16,8 @@ vendor/fetch.sh
 lake build
 ```
 
-The fetch downloads the Slang SDK the compile check links. Another Lake package depends on it
+The fetch downloads the Linux x86-64 Slang SDK the compile check links, so `lake build` links
+the check on that platform only. Another Lake package depends on it
 with:
 
 ```lean
