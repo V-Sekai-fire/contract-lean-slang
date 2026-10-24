@@ -7,7 +7,7 @@ A Lean 4 library that builds a Slang shader AST and prints it as source text, wi
 It lets a compute kernel be written and checked in Lean and emitted as a shader, rather than
 hand-ported from a separate spec. Reference fixtures are asserted when the library builds, so a
 change to the printer fails the build, and an end-to-end check compiles the emitted text in
-process. RFD 2032 owns the design.
+process. RFD66606-2032 owns the design.
 
 ## Build
 
